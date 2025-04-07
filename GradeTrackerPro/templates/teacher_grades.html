@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-header">
+    <h1>
+        <i class="fas fa-edit me-2"></i>成績管理
+    </h1>
+    
+    {% if selected_class %}
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addGradeItemModal">
+            <i class="fas fa-plus me-1"></i>新增成績項目
+        </button>
+    {% endif %}
+</div>
+
+<div class="content-card">
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label for="semesterSelector" class="form-label">學期：</label>
+            <div class="input-group">
+                <select id="semesterSelector" class="form-select">
+                    {% for semester in semesters %}
+                        <option value="{{ semester }}" {% if selected_semester == semester %}selected{% endif %}>
+                            {{ semester }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#addSemesterModal">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <label for="classSelector" class="form-label">班級：</label>
+            <select id="classSelector" class="form-select">
+                {% for class in classes %}
+                    <option value="{{ class.id }}" {% if selected_class and selected_class.id == class.id %}selected{% endif %}>
+                        {{ class.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <div class="mt-4">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#manageClassModal">
+                    <i class="fas fa-users-cog me-1"></i>班級管理
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    {% if classes %}
+        {% if selected_class %}
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3>{{ selected_class.name }}</h3>
+                </div>
+            </div>
+            
+            {% if students and grade_items %}
+                <div class="table-responsive">
+                    <table id="gradesTable" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="vertical-align: bottom;">座號</th>
+                                <th style="vertical-align: bottom;">姓名</th>
+                                {% for grade_item in grade_items %}
+                                    <th class="text-center">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span>{{ grade_item.name }}</span>
+                                            <button class="btn btn-sm btn-outline-danger delete-grade-item" 
+                                                    data-grade-item-id="{{ grade_item.id }}" title="刪除成績項目">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                                <tr>
+                                    <td>{{ student.seat_number }}</td>
+                                    <td>{{ student.name }}</td>
+                                    
+                                    {% for grade_item in grade_items %}
+                                        {% set grade = namespace(value=none) %}
+                                        {% if grades %}
+                                            {% for grade_obj in grades %}
+                                                {% if grade_obj.student_id == student.id and grade_obj.grade_item_id == grade_item.id %}
+                                                    {% set grade.value = grade_obj.value %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                        
+                                        <td class="text-center grade-cell" 
+                                            data-student-id="{{ student.id }}" 
+                                            data-grade-item-id="{{ grade_item.id }}">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   value="{{ grade.value|default('', true) }}" 
+                                                   placeholder="-">
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-4">
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle me-2"></i>操作說明：</h5>
+                        <ul class="mb-0">
+                            <li>直接在表格中輸入成績</li>
+                            <li>按Enter或點擊儲存圖示來保存變更</li>
+                            <li>空白或"-"表示尚未評分</li>
+                        </ul>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    {% if not students %}
+                        此班級中沒有找到學生。
+                    {% elif not grade_items %}
+                        此班級尚未定義成績項目。
+                    {% endif %}
+                    請先添加學生和成績項目。
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>請選擇一個班級來管理成績。
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>您尚未被分配任何班級。
+            <div class="mt-2">
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addClassModal">
+                    <i class="fas fa-plus me-1"></i>創建班級
+                </button>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- 新增成績項目模態框 -->
+<div class="modal fade" id="addGradeItemModal" tabindex="-1" aria-labelledby="addGradeItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addGradeItemModalLabel">新增成績項目</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addGradeItemForm">
+                    <div class="mb-3">
+                        <label for="gradeItemName" class="form-label">項目名稱</label>
+                        <input type="text" class="form-control" id="gradeItemName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="gradeItemMaxScore" class="form-label">滿分</label>
+                        <input type="number" class="form-control" id="gradeItemMaxScore" value="100" min="0" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveGradeItem">儲存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 班級管理模態框 -->
+<div class="modal fade" id="manageClassModal" tabindex="-1" aria-labelledby="manageClassModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="manageClassModalLabel">班級管理</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs mb-3" id="classManagementTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button" role="tab" aria-controls="students" aria-selected="true">學生管理</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="class-info-tab" data-bs-toggle="tab" data-bs-target="#class-info" type="button" role="tab" aria-controls="class-info" aria-selected="false">班級資訊</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="classManagementTabContent">
+                    <div class="tab-pane fade show active" id="students" role="tabpanel" aria-labelledby="students-tab">
+                        <div class="mb-3">
+                            <button class="btn btn-sm btn-success" id="addStudentBtn">
+                                <i class="fas fa-plus me-1"></i>新增學生
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" id="studentsTable">
+                                <thead>
+                                    <tr>
+                                        <th>座號</th>
+                                        <th>姓名</th>
+                                        <th>學號</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if students %}
+                                        {% for student in students %}
+                                            <tr>
+                                                <td>{{ student.seat_number }}</td>
+                                                <td>{{ student.name }}</td>
+                                                <td>{{ student.student_id }}</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary edit-student" data-student-id="{{ student.id }}">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger delete-student" data-student-id="{{ student.id }}">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="4" class="text-center">沒有學生</td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="class-info" role="tabpanel" aria-labelledby="class-info-tab">
+                        <form id="classInfoForm">
+                            <div class="mb-3">
+                                <label for="className" class="form-label">班級名稱</label>
+                                <input type="text" class="form-control" id="className" value="{{ selected_class.name if selected_class else '' }}">
+                            </div>
+                            <button type="button" class="btn btn-primary" id="saveClassInfo">儲存班級資訊</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 學生編輯模態框 -->
+<div class="modal fade" id="studentModal" tabindex="-1" aria-labelledby="studentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="studentModalLabel">學生資料</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="studentForm">
+                    <input type="hidden" id="studentId">
+                    <div class="mb-3">
+                        <label for="seatNumber" class="form-label">座號</label>
+                        <input type="number" class="form-control" id="seatNumber" min="1" required>
+                        <small class="form-text text-muted">座號將作為學生的登入帳號</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="studentName" class="form-label">姓名</label>
+                        <input type="text" class="form-control" id="studentName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="studentId" class="form-label">學號</label>
+                        <input type="text" class="form-control" id="studentIdInput" required>
+                        <small class="form-text text-muted">學號將作為學生的登入密碼</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveStudent">儲存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 新增班級模態框 -->
+<div class="modal fade" id="addClassModal" tabindex="-1" aria-labelledby="addClassModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addClassModalLabel">新增班級</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addClassForm">
+                    <div class="mb-3">
+                        <label for="newClassName" class="form-label">班級名稱</label>
+                        <input type="text" class="form-control" id="newClassName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newClassSemester" class="form-label">學期</label>
+                        <select class="form-select" id="newClassSemester">
+                            {% for semester in semesters %}
+                                <option value="{{ semester }}" {% if selected_semester == semester %}selected{% endif %}>
+                                    {{ semester }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveNewClass">儲存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 新增學期模態框 -->
+<div class="modal fade" id="addSemesterModal" tabindex="-1" aria-labelledby="addSemesterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addSemesterModalLabel">新增學期</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addSemesterForm">
+                    <div class="mb-3">
+                        <label for="newSemester" class="form-label">學期</label>
+                        <input type="text" class="form-control" id="newSemester" placeholder="例如：114-2" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveNewSemester">儲存</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/gradeTables.js') }}"></script>
+{% endblock %}

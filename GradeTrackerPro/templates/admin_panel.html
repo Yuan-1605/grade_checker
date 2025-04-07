@@ -1,0 +1,547 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-header">
+    <h1>
+        <i class="fas fa-users-cog me-2"></i>Admin Panel
+    </h1>
+</div>
+
+<div class="content-card">
+    <ul class="nav nav-tabs admin-tabs" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" 
+                    type="button" role="tab" aria-controls="users" aria-selected="true">
+                <i class="fas fa-users me-1"></i>Users
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="classes-tab" data-bs-toggle="tab" data-bs-target="#classes" 
+                    type="button" role="tab" aria-controls="classes" aria-selected="false">
+                <i class="fas fa-chalkboard me-1"></i>Classes
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="grade-items-tab" data-bs-toggle="tab" data-bs-target="#grade-items" 
+                    type="button" role="tab" aria-controls="grade-items" aria-selected="false">
+                <i class="fas fa-tasks me-1"></i>Grade Items
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="access-codes-tab" data-bs-toggle="tab" data-bs-target="#access-codes" 
+                    type="button" role="tab" aria-controls="access-codes" aria-selected="false">
+                <i class="fas fa-key me-1"></i>Access Codes
+            </button>
+        </li>
+    </ul>
+    
+    <div class="tab-content admin-content" id="adminTabsContent">
+        <!-- Users Tab -->
+        <div class="tab-pane fade show active" id="users" role="tabpanel" aria-labelledby="users-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Manage Users</h3>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal">
+                    <i class="fas fa-plus me-1"></i>Add User
+                </button>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <span class="badge {% if user.role == 'admin' %}bg-danger{% elif user.role == 'teacher' %}bg-success{% else %}bg-primary{% endif %}">
+                                    {{ user.role|capitalize }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-primary edit-user-btn" 
+                                        data-id="{{ user.id }}"
+                                        data-username="{{ user.username }}"
+                                        data-email="{{ user.email }}" 
+                                        data-role="{{ user.role }}"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#userModal">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Classes Tab -->
+        <div class="tab-pane fade" id="classes" role="tabpanel" aria-labelledby="classes-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Manage Classes</h3>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#classModal">
+                    <i class="fas fa-plus me-1"></i>Add Class
+                </button>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Class Name</th>
+                            <th>Teacher</th>
+                            <th>Students</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for class in classes %}
+                        <tr>
+                            <td>{{ class.id }}</td>
+                            <td>{{ class.name }}</td>
+                            <td>
+                                {% for user in users %}
+                                    {% if user.id == class.teacher_id %}
+                                        {{ user.username }}
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% from models import Student %}
+                                {% set students_count = Student.get_by_class_id(class.id)|length %}
+                                {{ students_count }}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-primary edit-class-btn" 
+                                        data-id="{{ class.id }}"
+                                        data-name="{{ class.name }}" 
+                                        data-teacher-id="{{ class.teacher_id }}"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#classModal">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Grade Items Tab -->
+        <div class="tab-pane fade" id="grade-items" role="tabpanel" aria-labelledby="grade-items-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Manage Grade Items</h3>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#gradeItemModal">
+                    <i class="fas fa-plus me-1"></i>Add Grade Item
+                </button>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Class</th>
+                            <th>Max Score</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for grade_item in grade_items %}
+                        <tr>
+                            <td>{{ grade_item.id }}</td>
+                            <td>{{ grade_item.name }}</td>
+                            <td>
+                                {% for class in classes %}
+                                    {% if class.id == grade_item.class_id %}
+                                        {{ class.name }}
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>{{ grade_item.max_score }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary edit-grade-item-btn" 
+                                        data-id="{{ grade_item.id }}"
+                                        data-name="{{ grade_item.name }}" 
+                                        data-class-id="{{ grade_item.class_id }}"
+                                        data-max-score="{{ grade_item.max_score }}"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#gradeItemModal">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Access Codes Tab -->
+        <div class="tab-pane fade" id="access-codes" role="tabpanel" aria-labelledby="access-codes-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Manage Access Codes</h3>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#accessCodeModal">
+                    <i class="fas fa-plus me-1"></i>Add Access Code
+                </button>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Code</th>
+                            <th>Role</th>
+                            <th>Expiry Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for access_code in access_codes %}
+                        <tr>
+                            <td>{{ access_code.id }}</td>
+                            <td>{{ access_code.code }}</td>
+                            <td>
+                                <span class="badge {% if access_code.role == 'admin' %}bg-danger{% elif access_code.role == 'teacher' %}bg-success{% else %}bg-primary{% endif %}">
+                                    {{ access_code.role|capitalize }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if access_code.expiry_date %}
+                                    {{ access_code.expiry_date.strftime('%Y-%m-%d') }}
+                                {% else %}
+                                    <span class="text-muted">Never expires</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if access_code.is_valid() %}
+                                    <span class="badge bg-success">Valid</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Expired</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-primary edit-access-code-btn" 
+                                        data-id="{{ access_code.id }}"
+                                        data-code="{{ access_code.code }}" 
+                                        data-role="{{ access_code.role }}"
+                                        data-expiry-date="{{ access_code.expiry_date.strftime('%Y-%m-%d') if access_code.expiry_date else '' }}"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#accessCodeModal">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Modal -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userModalLabel">Add/Edit User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('manage_users') }}" method="POST">
+                {{ form.hidden_tag() }}
+                <div class="modal-body">
+                    <input type="hidden" id="user_id" name="user_id">
+                    
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" 
+                               placeholder="Leave blank to keep current password">
+                        <small class="form-text text-muted">Only fill this when creating a new user or changing password</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Role</label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="student">Student</option>
+                            <option value="teacher">Teacher</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Class Modal -->
+<div class="modal fade" id="classModal" tabindex="-1" aria-labelledby="classModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="classModalLabel">Add/Edit Class</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('manage_classes') }}" method="POST">
+                {{ form.hidden_tag() }}
+                <div class="modal-body">
+                    <input type="hidden" id="class_id" name="class_id">
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Class Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="teacher_id" class="form-label">Teacher</label>
+                        <select class="form-select" id="teacher_id" name="teacher_id" required>
+                            {% for user in users %}
+                                {% if user.role == 'teacher' or user.role == 'admin' %}
+                                    <option value="{{ user.id }}">{{ user.username }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Grade Item Modal -->
+<div class="modal fade" id="gradeItemModal" tabindex="-1" aria-labelledby="gradeItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="gradeItemModalLabel">Add/Edit Grade Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('manage_grade_items') }}" method="POST">
+                {{ form.hidden_tag() }}
+                <div class="modal-body">
+                    <input type="hidden" id="grade_item_id" name="grade_item_id">
+                    
+                    <div class="mb-3">
+                        <label for="grade_item_name" class="form-label">Item Name</label>
+                        <input type="text" class="form-control" id="grade_item_name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="class_id" class="form-label">Class</label>
+                        <select class="form-select" id="class_id" name="class_id" required>
+                            {% for class in classes %}
+                                <option value="{{ class.id }}">{{ class.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="max_score" class="form-label">Maximum Score</label>
+                        <input type="number" class="form-control" id="max_score" name="max_score" 
+                               min="0" step="0.1" value="100" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Access Code Modal -->
+<div class="modal fade" id="accessCodeModal" tabindex="-1" aria-labelledby="accessCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="accessCodeModalLabel">Add/Edit Access Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('manage_access_codes') }}" method="POST">
+                {{ form.hidden_tag() }}
+                <div class="modal-body">
+                    <input type="hidden" id="access_code_id" name="access_code_id">
+                    
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Access Code</label>
+                        <input type="text" class="form-control" id="code" name="code" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="access_code_role" class="form-label">Role</label>
+                        <select class="form-select" id="access_code_role" name="role" required>
+                            <option value="student">Student</option>
+                            <option value="teacher">Teacher</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="expiry_date" class="form-label">Expiry Date (Optional)</label>
+                        <input type="date" class="form-control" id="expiry_date" name="expiry_date">
+                        <small class="form-text text-muted">Leave blank for no expiration</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // User modal
+        const userModal = document.getElementById('userModal');
+        if (userModal) {
+            userModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const isEdit = button.classList.contains('edit-user-btn');
+                
+                const modal = this;
+                const title = modal.querySelector('.modal-title');
+                const userIdInput = modal.querySelector('#user_id');
+                const usernameInput = modal.querySelector('#username');
+                const emailInput = modal.querySelector('#email');
+                const passwordInput = modal.querySelector('#password');
+                const roleSelect = modal.querySelector('#role');
+                
+                if (isEdit) {
+                    title.textContent = 'Edit User';
+                    userIdInput.value = button.getAttribute('data-id');
+                    usernameInput.value = button.getAttribute('data-username');
+                    emailInput.value = button.getAttribute('data-email');
+                    passwordInput.value = '';
+                    passwordInput.placeholder = 'Leave blank to keep current password';
+                    roleSelect.value = button.getAttribute('data-role');
+                } else {
+                    title.textContent = 'Add User';
+                    userIdInput.value = '';
+                    usernameInput.value = '';
+                    emailInput.value = '';
+                    passwordInput.value = '';
+                    passwordInput.placeholder = 'Enter password for new user';
+                    roleSelect.value = 'student';
+                }
+            });
+        }
+        
+        // Class modal
+        const classModal = document.getElementById('classModal');
+        if (classModal) {
+            classModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const isEdit = button.classList.contains('edit-class-btn');
+                
+                const modal = this;
+                const title = modal.querySelector('.modal-title');
+                const classIdInput = modal.querySelector('#class_id');
+                const nameInput = modal.querySelector('#name');
+                const teacherSelect = modal.querySelector('#teacher_id');
+                
+                if (isEdit) {
+                    title.textContent = 'Edit Class';
+                    classIdInput.value = button.getAttribute('data-id');
+                    nameInput.value = button.getAttribute('data-name');
+                    teacherSelect.value = button.getAttribute('data-teacher-id');
+                } else {
+                    title.textContent = 'Add Class';
+                    classIdInput.value = '';
+                    nameInput.value = '';
+                    teacherSelect.selectedIndex = 0;
+                }
+            });
+        }
+        
+        // Grade Item modal
+        const gradeItemModal = document.getElementById('gradeItemModal');
+        if (gradeItemModal) {
+            gradeItemModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const isEdit = button.classList.contains('edit-grade-item-btn');
+                
+                const modal = this;
+                const title = modal.querySelector('.modal-title');
+                const gradeItemIdInput = modal.querySelector('#grade_item_id');
+                const nameInput = modal.querySelector('#grade_item_name');
+                const classSelect = modal.querySelector('#class_id');
+                const maxScoreInput = modal.querySelector('#max_score');
+                
+                if (isEdit) {
+                    title.textContent = 'Edit Grade Item';
+                    gradeItemIdInput.value = button.getAttribute('data-id');
+                    nameInput.value = button.getAttribute('data-name');
+                    classSelect.value = button.getAttribute('data-class-id');
+                    maxScoreInput.value = button.getAttribute('data-max-score');
+                } else {
+                    title.textContent = 'Add Grade Item';
+                    gradeItemIdInput.value = '';
+                    nameInput.value = '';
+                    classSelect.selectedIndex = 0;
+                    maxScoreInput.value = 100;
+                }
+            });
+        }
+        
+        // Access Code modal
+        const accessCodeModal = document.getElementById('accessCodeModal');
+        if (accessCodeModal) {
+            accessCodeModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const isEdit = button.classList.contains('edit-access-code-btn');
+                
+                const modal = this;
+                const title = modal.querySelector('.modal-title');
+                const accessCodeIdInput = modal.querySelector('#access_code_id');
+                const codeInput = modal.querySelector('#code');
+                const roleSelect = modal.querySelector('#access_code_role');
+                const expiryDateInput = modal.querySelector('#expiry_date');
+                
+                if (isEdit) {
+                    title.textContent = 'Edit Access Code';
+                    accessCodeIdInput.value = button.getAttribute('data-id');
+                    codeInput.value = button.getAttribute('data-code');
+                    roleSelect.value = button.getAttribute('data-role');
+                    expiryDateInput.value = button.getAttribute('data-expiry-date');
+                } else {
+                    title.textContent = 'Add Access Code';
+                    accessCodeIdInput.value = '';
+                    codeInput.value = '';
+                    roleSelect.value = 'student';
+                    expiryDateInput.value = '';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

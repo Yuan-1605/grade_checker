@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-header">
+    <h1>
+        <i class="fas fa-graduation-cap me-2"></i>My Grades
+    </h1>
+</div>
+
+<div class="content-card">
+    <div class="student-info mb-4">
+        <h3>{{ student.name }}</h3>
+        {% for class in classes %}
+            {% if class.id == student.class_id %}
+                <p class="text-muted">Class: {{ class.name }}</p>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    {% if grades %}
+        <!-- Progress Summary -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Overall Average</h5>
+                        {% set total_score = 0 %}
+                        {% set total_max = 0 %}
+                        {% set count = 0 %}
+                        {% for grade in grades %}
+                            {% if grade.value is not none %}
+                                {% set total_score = total_score + grade.value %}
+                                {% set total_max = total_max + grade.max_score %}
+                                {% set count = count + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if count > 0 %}
+                            {% set percentage = (total_score / total_max * 100)|round(1) %}
+                            <h2 class="mb-0">{{ percentage }}%</h2>
+                            <small>Based on {{ count }} graded items</small>
+                        {% else %}
+                            <h2 class="mb-0">N/A</h2>
+                            <small>No grades available yet</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Grade Distribution</h5>
+                        <div class="progress" style="height: 25px;">
+                            {% set grade_ranges = {
+                                'A': {'min': 90, 'color': 'success', 'count': 0},
+                                'B': {'min': 80, 'color': 'info', 'count': 0},
+                                'C': {'min': 70, 'color': 'primary', 'count': 0},
+                                'D': {'min': 60, 'color': 'warning', 'count': 0},
+                                'F': {'min': 0, 'color': 'danger', 'count': 0}
+                            } %}
+                            
+                            {% for grade in grades %}
+                                {% if grade.percentage is not none %}
+                                    {% set found = false %}
+                                    {% for letter, range_data in grade_ranges.items() %}
+                                        {% if not found and grade.percentage >= range_data.min %}
+                                            {% set _ = grade_ranges[letter].update({'count': grade_ranges[letter].count + 1}) %}
+                                            {% set found = true %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% set total_items = 0 %}
+                            {% for letter, range_data in grade_ranges.items() %}
+                                {% set total_items = total_items + range_data.count %}
+                            {% endfor %}
+                            
+                            {% if total_items > 0 %}
+                                {% for letter, range_data in grade_ranges.items() %}
+                                    {% if range_data.count > 0 %}
+                                        {% set percentage = (range_data.count / total_items * 100)|round %}
+                                        <div class="progress-bar bg-{{ range_data.color }}" 
+                                             role="progressbar" 
+                                             style="width: {{ percentage }}%" 
+                                             aria-valuenow="{{ percentage }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                            {{ letter }} ({{ range_data.count }})
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <div class="progress-bar bg-secondary" role="progressbar" style="width: 100%">
+                                    No grades available
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grades Table -->
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Assessment</th>
+                        <th class="text-center">Score</th>
+                        <th class="text-center">Out of</th>
+                        <th class="text-center">Percentage</th>
+                        <th class="text-center">Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for grade in grades %}
+                    <tr>
+                        <td>{{ grade.grade_item_name }}</td>
+                        <td class="text-center">
+                            {% if grade.value is not none %}
+                                {{ grade.value }}
+                            {% else %}
+                                <span class="text-muted">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">{{ grade.max_score }}</td>
+                        <td class="text-center">
+                            {% if grade.percentage is not none %}
+                                <div class="d-inline-block" style="width: 80px;">
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-{{ 'success' if grade.percentage >= 90 else 'info' if grade.percentage >= 80 else 'primary' if grade.percentage >= 70 else 'warning' if grade.percentage >= 60 else 'danger' }}" 
+                                             role="progressbar" 
+                                             style="width: {{ grade.percentage }}%" 
+                                             aria-valuenow="{{ grade.percentage }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100"></div>
+                                    </div>
+                                    <span class="small">{{ grade.percentage|round(1) }}%</span>
+                                </div>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if grade.percentage is not none %}
+                                {% if grade.percentage >= 90 %}
+                                    <span class="badge bg-success">A</span>
+                                {% elif grade.percentage >= 80 %}
+                                    <span class="badge bg-info">B</span>
+                                {% elif grade.percentage >= 70 %}
+                                    <span class="badge bg-primary">C</span>
+                                {% elif grade.percentage >= 60 %}
+                                    <span class="badge bg-warning">D</span>
+                                {% else %}
+                                    <span class="badge bg-danger">F</span>
+                                {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>No grades available for you yet.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

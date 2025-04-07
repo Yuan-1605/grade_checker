@@ -1,0 +1,454 @@
+/* 
+ * 成績管理系統樣式表
+ * 學院風格設計，使用柔和、清晰的配色
+ */
+
+:root {
+    /* 主要配色方案 */
+    --primary-color: #3a5683;        /* 主要顏色 - 深藍色 */
+    --secondary-color: #6c8cae;      /* 次要顏色 - 中藍色 */
+    --accent-color: #d0e0f0;         /* 強調顏色 - 淺藍色 */
+    
+    /* 文字和背景 */
+    --text-color: #333333;           /* 主要文字顏色 */
+    --light-text: #777777;           /* 淺色文字 */
+    --background-color: #f8f9fa;     /* 頁面背景色 */
+    --card-bg: #ffffff;              /* 卡片背景 */
+    --border-color: #dee2e6;         /* 邊框顏色 */
+    
+    /* 功能色 */
+    --success-color: #5a9a7e;        /* 成功 - 綠色 */
+    --warning-color: #e6ac4c;        /* 警告 - 橙色 */
+    --danger-color: #c15b5b;         /* 危險 - 紅色 */
+    
+    /* 輔助色 */
+    --info-light-bg: #e7f1ff;        /* 信息背景 - 淺藍 */
+    --success-light-bg: #e7f6ef;     /* 成功背景 - 淺綠 */
+    --warning-light-bg: #fff8e7;     /* 警告背景 - 淺黃 */
+    --danger-light-bg: #ffeaea;      /* 危險背景 - 淺紅 */
+}
+
+body {
+    font-family: 'Roboto', 'Segoe UI', 'Arial', sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    padding-bottom: 40px;
+}
+
+.main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header and Navigation */
+.navbar {
+    background-color: var(--primary-color) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: white !important;
+    font-size: 1.5rem;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: white !important;
+}
+
+.navbar-dark .navbar-nav .active > .nav-link {
+    color: white !important;
+    font-weight: 600;
+}
+
+/* Authentication Styles */
+.auth-container {
+    max-width: 450px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.auth-header {
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: var(--primary-color);
+}
+
+.auth-form .form-control {
+    height: 48px;
+    font-size: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.auth-form .form-control:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.2rem rgba(106, 140, 175, 0.2);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    padding: 10px 20px;
+    font-weight: 600;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: #2d4566;
+    border-color: #2d4566;
+}
+
+/* Dashboard and Content Cards */
+.content-card {
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.card-title {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.content-header h1 {
+    color: var(--primary-color);
+    font-size: 1.75rem;
+    margin-bottom: 0;
+}
+
+/* Tables */
+.table {
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.table thead th {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.table td, .table th {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: var(--primary-color);
+    color: white !important;
+    border: 1px solid var(--primary-color);
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: var(--secondary-color);
+    color: white !important;
+    border: 1px solid var(--secondary-color);
+}
+
+.table input.form-control {
+    width: 80px;
+    text-align: center;
+    padding: 0.25rem 0.5rem;
+    height: auto;
+}
+
+/* 成績單元格樣式 */
+.grade-cell {
+    position: relative;
+}
+
+.grade-cell input {
+    width: 70px;
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+    transition: all 0.3s ease;
+    font-family: 'Roboto Mono', monospace, sans-serif; /* 使用等寬字體，讓數字對齊 */
+}
+
+.grade-cell input:focus {
+    border-color: var(--secondary-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(106, 140, 175, 0.25);
+    background-color: #f8fbff; /* 淺藍色背景，強調焦點 */
+}
+
+/* 目前編輯中的成績框強調 */
+.grade-cell.current-edit input {
+    background-color: #fffde7;
+    border-color: var(--warning-color);
+}
+
+/* 成績儲存視覺反饋 */
+.grade-cell input.saving {
+    background-color: var(--info-light-bg);
+    border-color: var(--secondary-color);
+    color: var(--secondary-color);
+}
+
+.grade-cell input.save-success {
+    background-color: var(--success-light-bg);
+    border-color: var(--success-color);
+    color: var(--success-color);
+}
+
+.grade-cell input.save-error {
+    background-color: var(--danger-light-bg);
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+}
+
+/* 成績輸入提示 */
+.grade-input-help {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--card-bg);
+    border-radius: 6px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    padding: 10px 15px;
+    font-size: 0.9rem;
+    color: var(--light-text);
+    max-width: 250px;
+    z-index: 1050;
+    border-left: 4px solid var(--primary-color);
+}
+
+.grade-input-help kbd {
+    background: var(--accent-color);
+    color: var(--primary-color);
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Admin Panel */
+.admin-tabs .nav-link {
+    padding: 10px 20px;
+    color: var(--text-color);
+    border-radius: 0;
+    border: none;
+    border-bottom: 2px solid transparent;
+}
+
+.admin-tabs .nav-link.active {
+    color: var(--primary-color);
+    background-color: transparent;
+    border-bottom: 2px solid var(--primary-color);
+    font-weight: 600;
+}
+
+.admin-tabs .nav-link:hover {
+    color: var(--primary-color);
+}
+
+.admin-content {
+    padding-top: 20px;
+}
+
+/* Forms */
+.form-label {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.form-control {
+    border-radius: 4px;
+}
+
+.form-control:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.2rem rgba(106, 140, 175, 0.1);
+}
+
+/* 按鈕樣式 */
+.btn {
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* 按鈕尺寸 */
+.btn-xs {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+}
+
+.btn-lg {
+    padding: 12px 24px;
+    font-size: 1.1rem;
+}
+
+/* 功能按鈕顏色 */
+.btn-success {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #4d8b70;
+    border-color: #4d8b70;
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    border-color: var(--warning-color);
+    color: white;
+}
+
+.btn-warning:hover {
+    background-color: #d19a38;
+    border-color: #d19a38;
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #b04e4e;
+    border-color: #b04e4e;
+}
+
+/* 按鈕內圖示間距 */
+.btn i {
+    margin-right: 5px;
+}
+
+/* 只有圖示的按鈕 */
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.btn-icon i {
+    margin: 0;
+}
+
+/* Alerts */
+.alert {
+    border-radius: 4px;
+    border-left-width: 4px;
+}
+
+.alert-success {
+    border-left-color: var(--success-color);
+}
+
+.alert-warning {
+    border-left-color: var(--warning-color);
+}
+
+.alert-danger {
+    border-left-color: var(--danger-color);
+}
+
+/* Import Form */
+.import-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.import-form {
+    padding: 20px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.import-instructions {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: var(--accent-color);
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.custom-file-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .content-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .content-header .btn {
+        margin-top: 10px;
+    }
+    
+    .table-responsive {
+        border: none;
+    }
+    
+    .table input.form-control {
+        width: 60px;
+    }
+}
+
+/* Footer */
+.footer {
+    margin-top: 40px;
+    padding: 20px 0;
+    background-color: #f1f1f1;
+    color: var(--light-text);
+    text-align: center;
+    font-size: 0.9rem;
+}

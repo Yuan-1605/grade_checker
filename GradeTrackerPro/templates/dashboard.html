@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-card">
+    <div class="text-center">
+        <h1 class="mb-4">Welcome to the Grade Management System</h1>
+        
+        <div class="mb-4">
+            <i class="fas fa-user-circle fa-4x text-primary mb-3"></i>
+            <h2>Hello, {{ current_user.username }}</h2>
+            <p class="text-muted">
+                Role: 
+                <span class="badge {% if current_user.role == 'admin' %}bg-danger{% elif current_user.role == 'teacher' %}bg-success{% else %}bg-primary{% endif %}">
+                    {{ current_user.role|capitalize }}
+                </span>
+            </p>
+        </div>
+        
+        <div class="row mt-5">
+            {% if current_user.role == 'student' %}
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <i class="fas fa-graduation-cap fa-3x text-primary mb-3"></i>
+                            <h3>My Grades</h3>
+                            <p>View your current academic performance</p>
+                            <a href="{{ url_for('student_grades') }}" class="btn btn-primary">
+                                <i class="fas fa-chart-line me-1"></i>View Grades
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% elif current_user.role == 'teacher' %}
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <i class="fas fa-edit fa-3x text-primary mb-3"></i>
+                            <h3>Manage Grades</h3>
+                            <p>View and edit student grades for your classes</p>
+                            <a href="{{ url_for('teacher_grades') }}" class="btn btn-primary">
+                                <i class="fas fa-pen me-1"></i>Manage Grades
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <i class="fas fa-file-excel fa-3x text-success mb-3"></i>
+                            <h3>Import Grades</h3>
+                            <p>Import student grades from Excel spreadsheets</p>
+                            <a href="{{ url_for('import_grades') }}" class="btn btn-success">
+                                <i class="fas fa-upload me-1"></i>Import Data
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% elif current_user.role == 'admin' %}
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <i class="fas fa-users-cog fa-3x text-primary mb-3"></i>
+                            <h3>Admin Panel</h3>
+                            <p>Manage users, classes, and access codes</p>
+                            <a href="{{ url_for('admin_panel') }}" class="btn btn-primary">
+                                <i class="fas fa-cog me-1"></i>Admin Panel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <i class="fas fa-edit fa-3x text-success mb-3"></i>
+                            <h3>Manage Grades</h3>
+                            <p>View and edit student grades for all classes</p>
+                            <a href="{{ url_for('teacher_grades') }}" class="btn btn-success">
+                                <i class="fas fa-pen me-1"></i>Manage Grades
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <i class="fas fa-file-excel fa-3x text-warning mb-3"></i>
+                            <h3>Import Grades</h3>
+                            <p>Import student grades from Excel spreadsheets</p>
+                            <a href="{{ url_for('import_grades') }}" class="btn btn-warning">
+                                <i class="fas fa-upload me-1"></i>Import Data
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

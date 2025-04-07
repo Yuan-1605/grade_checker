@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-header">
+    <h1>
+        <i class="fas fa-file-excel me-2"></i>成績匯入
+    </h1>
+</div>
+
+<div class="import-container">
+    <div class="content-card import-form">
+        <h3 class="mb-4">Excel 匯入工具</h3>
+        
+        <div class="import-instructions">
+            <h5><i class="fas fa-info-circle me-2"></i>使用說明:</h5>
+            <ol>
+                <li>選擇要匯入成績的班級</li>
+                <li>準備符合以下格式的 Excel 檔案:
+                    <ul>
+                        <li>第一列: 學生五碼座號（例如30102）</li>
+                        <li>第二列: 學生姓名（與座號對應）</li>
+                        <li>第三列之後: 各項成績（數值）</li>
+                    </ul>
+                </li>
+                <li>上傳 Excel 檔案（.xlsx 或 .xls 格式）</li>
+                <li>查看預覽並確認匯入</li>
+            </ol>
+        </div>
+        
+        <form id="importForm" method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            
+            <div class="mb-4">
+                <label for="{{ form.class_id.id }}" class="form-label">選擇班級</label>
+                {{ form.class_id(class="form-select") }}
+                {% if form.class_id.errors %}
+                    <div class="text-danger small mt-1">
+                        {% for error in form.class_id.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-4">
+                <label for="{{ form.file.id }}" class="form-label">Excel 檔案</label>
+                <div class="custom-file">
+                    <input type="file" class="form-control" id="file" name="file" accept=".xlsx,.xls">
+                </div>
+                {% if form.file.errors %}
+                    <div class="text-danger small mt-1">
+                        {% for error in form.file.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- 預覽區域 -->
+            <div id="excelPreview"></div>
+            
+            <div class="d-grid mt-4">
+                {{ form.submit(class="btn btn-primary btn-lg", value="匯入成績") }}
+            </div>
+        </form>
+        
+        <div class="mt-4">
+            <div class="alert alert-warning">
+                <h5><i class="fas fa-exclamation-triangle me-2"></i>重要說明:</h5>
+                <ul class="mb-0">
+                    <li>如果班級中不存在相同座號的學生，系統會自動建立新學生</li>
+                    <li>系統會自動為未定義的成績項目創建新項目</li>
+                    <li>既有的成績會被 Excel 中的新值覆蓋</li>
+                    <li>Excel 中的空白儲存格不會覆蓋已存在的成績</li>
+                    <li>五碼座號格式（例如30102）必須與學生管理中的座號格式一致</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/excelImport.js') }}"></script>
+{% endblock %}
